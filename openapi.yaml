@@ -1,0 +1,608 @@
+openapi: 3.0.3
+info:
+  title: Employee Attendance & Analytics API
+  description: >
+    Complete API for employee management, attendance tracking with punch-in/punch-out,
+    manual corrections with audit trail, and analytics powered by MongoDB aggregations.
+
+    ## Business Rules
+
+    - **R1**: Employee email must be unique.
+    - **R2**: Punch-in creates an attendance log; status = 'present'.
+    - **R3**: Punch-out updates the log; status = 'completed'; work_hours calculated.
+    - **R4**: Cannot punch in twice on the same day (concurrency-protected).
+    - **R5**: Cannot punch out without a punch-in on the same day.
+    - **R6**: Punch-out time must be after punch-in time.
+    - **R7**: Manual corrections allowed with reason; audit trail recorded.
+    - **R8**: Corrected punch-out must still be after punch-in.
+    - **R9**: Standard work day = 8 hours; overtime = work_hours - 8 (if positive).
+    - **R10**: Attendance rate = present / total_employees per department.
+  version: 1.0.0
+  contact:
+    name: SDT Candidate
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+
+tags:
+  - name: Employees
+    description: Employee CRUD operations
+  - name: Attendance
+    description: Punch-in, punch-out, corrections, and audit trail
+  - name: Analytics
+    description: Department and employee analytics with MongoDB aggregations
+  - name: System
+    description: Health check and API info
+
+paths:
+  /:
+    get:
+      tags: [System]
+      summary: API root
+      responses:
+        '200':
+          description: API information
+
+  /health:
+    get:
+      tags: [System]
+      summary: Health check
+      responses:
+        '200':
+          description: Health status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  database:
+                    type: string
+                  timestamp:
+                    type: string
+
+  /employees:
+    post:
+      tags: [Employees]
+      summary: Create a new employee
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmployeeCreate'
+      responses:
+        '201':
+          description: Employee created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeResponse'
+        '409':
+          description: Email already exists
+        '422':
+          description: Validation error
+    get:
+      tags: [Employees]
+      summary: List employees with pagination
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: department
+          in: query
+          schema:
+            $ref: '#/components/schemas/DepartmentEnum'
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paginated list of employees
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedEmployees'
+
+  /employees/{employee_id}:
+    get:
+      tags: [Employees]
+      summary: Get a single employee
+      parameters:
+        - name: employee_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Employee found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeResponse'
+        '404':
+          description: Employee not found
+        '400':
+          description: Invalid ID format
+    put:
+      tags: [Employees]
+      summary: Update an employee
+      parameters:
+        - name: employee_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmployeeUpdate'
+      responses:
+        '200':
+          description: Employee updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeResponse'
+        '404':
+          description: Employee not found
+    delete:
+      tags: [Employees]
+      summary: Delete an employee
+      parameters:
+        - name: employee_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Employee deleted
+        '404':
+          description: Employee not found
+
+  /attendance/punch-in:
+    post:
+      tags: [Attendance]
+      summary: Punch in for the day
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PunchInRequest'
+      responses:
+        '201':
+          description: Punch-in recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttendanceLogResponse'
+        '404':
+          description: Employee not found
+        '409':
+          description: Already punched in today
+
+  /attendance/punch-out:
+    post:
+      tags: [Attendance]
+      summary: Punch out for the day
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PunchOutRequest'
+      responses:
+        '200':
+          description: Punch-out recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttendanceLogResponse'
+        '404':
+          description: No punch-in found for today
+        '409':
+          description: Already punched out
+        '400':
+          description: Punch-out before punch-in
+
+  /attendance/logs:
+    get:
+      tags: [Attendance]
+      summary: List attendance logs with filters and pagination
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: employee_id
+          in: query
+          schema:
+            type: string
+        - name: date_from
+          in: query
+          schema:
+            type: string
+        - name: date_to
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [present, completed, absent]
+      responses:
+        '200':
+          description: Paginated attendance logs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAttendance'
+
+  /attendance/logs/{log_id}:
+    get:
+      tags: [Attendance]
+      summary: Get a single attendance log
+      parameters:
+        - name: log_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Attendance log found
+        '404':
+          description: Log not found
+
+  /attendance/correction:
+    patch:
+      tags: [Attendance]
+      summary: Manually correct a punch-in or punch-out time
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CorrectionRequest'
+      responses:
+        '200':
+          description: Correction applied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttendanceLogResponse'
+        '404':
+          description: Log not found
+        '400':
+          description: Corrected punch-out before punch-in
+
+  /attendance/audit/{log_id}:
+    get:
+      tags: [Attendance]
+      summary: Get audit trail for an attendance log
+      parameters:
+        - name: log_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Audit trail entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditEntry'
+        '404':
+          description: No audit trail found
+
+  /analytics/department:
+    get:
+      tags: [Analytics]
+      summary: Department-wise attendance analytics
+      parameters:
+        - name: date_filter
+          in: query
+          schema:
+            type: string
+            description: ISO date YYYY-MM-DD; defaults to today
+      responses:
+        '200':
+          description: Department analytics
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AnalyticsResponse'
+
+  /analytics/employee/{employee_id}:
+    get:
+      tags: [Analytics]
+      summary: Employee attendance summary
+      parameters:
+        - name: employee_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: date_from
+          in: query
+          schema:
+            type: string
+        - name: date_to
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Employee analytics summary
+        '404':
+          description: Employee not found
+
+  /analytics/summary:
+    get:
+      tags: [Analytics]
+      summary: Overall attendance summary
+      parameters:
+        - name: date_filter
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Company-wide summary
+
+  /analytics/explain:
+    get:
+      tags: [Analytics]
+      summary: Inspect MongoDB query execution plan
+      parameters:
+        - name: collection
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [employees, attendance_logs]
+        - name: employee_id
+          in: query
+          schema:
+            type: string
+        - name: date_filter
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Query execution plan
+
+components:
+  schemas:
+    DepartmentEnum:
+      type: string
+      enum:
+        - Engineering
+        - HR
+        - Sales
+        - Marketing
+        - Finance
+        - Operations
+
+    EmployeeCreate:
+      type: object
+      required: [name, email, department, designation, salary, join_date]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        department:
+          $ref: '#/components/schemas/DepartmentEnum'
+        designation:
+          type: string
+        salary:
+          type: number
+          minimum: 0
+        join_date:
+          type: string
+          description: ISO date YYYY-MM-DD
+
+    EmployeeUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        department:
+          $ref: '#/components/schemas/DepartmentEnum'
+        designation:
+          type: string
+        salary:
+          type: number
+
+    EmployeeResponse:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        department:
+          type: string
+        designation:
+          type: string
+        salary:
+          type: number
+        join_date:
+          type: string
+        created_at:
+          type: string
+        updated_at:
+          type: string
+
+    PaginatedEmployees:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/EmployeeResponse'
+        total:
+          type: integer
+        page:
+          type: integer
+        page_size:
+          type: integer
+        total_pages:
+          type: integer
+
+    PunchInRequest:
+      type: object
+      required: [employee_id]
+      properties:
+        employee_id:
+          type: string
+        punch_in_time:
+          type: string
+          description: ISO 8601 datetime; defaults to now
+
+    PunchOutRequest:
+      type: object
+      required: [employee_id]
+      properties:
+        employee_id:
+          type: string
+        punch_out_time:
+          type: string
+          description: ISO 8601 datetime; defaults to now
+
+    AttendanceLogResponse:
+      type: object
+      properties:
+        _id:
+          type: string
+        employee_id:
+          type: string
+        punch_in:
+          type: string
+        punch_out:
+          type: string
+          nullable: true
+        work_hours:
+          type: number
+          nullable: true
+        status:
+          type: string
+          enum: [present, completed, absent]
+        is_corrected:
+          type: boolean
+        created_at:
+          type: string
+        updated_at:
+          type: string
+
+    PaginatedAttendance:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AttendanceLogResponse'
+        total:
+          type: integer
+        page:
+          type: integer
+        page_size:
+          type: integer
+        total_pages:
+          type: integer
+
+    CorrectionRequest:
+      type: object
+      required: [employee_id, attendance_log_id, field_name, new_value, reason, corrected_by]
+      properties:
+        employee_id:
+          type: string
+        attendance_log_id:
+          type: string
+        field_name:
+          type: string
+          enum: [punch_in, punch_out]
+        new_value:
+          type: string
+          description: New ISO 8601 datetime
+        reason:
+          type: string
+        corrected_by:
+          type: string
+
+    AuditEntry:
+      type: object
+      properties:
+        _id:
+          type: string
+        attendance_log_id:
+          type: string
+        employee_id:
+          type: string
+        field_name:
+          type: string
+        old_value:
+          type: string
+          nullable: true
+        new_value:
+          type: string
+        reason:
+          type: string
+        corrected_by:
+          type: string
+        created_at:
+          type: string
+
+    AnalyticsResponse:
+      type: object
+      properties:
+        department:
+          type: string
+        total_employees:
+          type: integer
+        present_today:
+          type: integer
+        absent_today:
+          type: integer
+        avg_work_hours:
+          type: number
+        total_overtime_hours:
+          type: number
+        attendance_rate:
+          type: number

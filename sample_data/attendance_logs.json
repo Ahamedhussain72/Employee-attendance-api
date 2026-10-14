@@ -1,0 +1,92 @@
+[
+  {
+    "employee_id": "PLACEHOLDER_REPLACE_AFTER_SEED",
+    "punch_in": "2025-10-01T09:00:00+00:00",
+    "punch_out": "2025-10-01T17:30:00+00:00",
+    "work_hours": 8.5,
+    "status": "completed",
+    "is_corrected": false,
+    "punch_in_date": "2025-10-01"
+  },
+  {
+    "employee_id": "PLACEHOLDER_REPLACE_AFTER_SEED",
+    "punch_in": "2025-10-01T09:15:00+00:00",
+    "punch_out": "2025-10-01T18:00:00+00:00",
+    "work_hours": 8.75,
+    "status": "completed",
+    "is_corrected": false,
+    "punch_in_date": "2025-10-01"
+  },
+  {
+    "employee_id": "PLACEHOLDER_REPLACE_AFTER_SEED",
+    "punch_in": "2025-10-01T08:45:00+00:00",
+    "punch_out": "2025-10-01T16:30:00+00:00",
+    "work_hours": 7.75,
+    "status": "completed",
+    "is_corrected": false,
+    "punch_in_date": "2025-10-01"
+  },
+  {
+    "employee_id": "PLACEHOLDER_REPLACE_AFTER_SEED",
+    "punch_in": "2025-10-01T09:30:00+00:00",
+    "punch_out": null,
+    "work_hours": null,
+    "status": "present",
+    "is_corrected": false,
+    "punch_in_date": "2025-10-01"
+  },
+  {
+    "employee_id": "PLACEHOLDER_REPLACE_AFTER_SEED",
+    "punch_in": "2025-10-02T09:00:00+00:00",
+    "punch_out": "2025-10-02T17:00:00+00:00",
+    "work_hours": 8.0,
+    "status": "completed",
+    "is_corrected": false,
+    "punch_in_date": "2025-10-02"
+  },
+  {
+    "employee_id": "PLACEHOLDER_REPLACE_AFTER_SEED",
+    "punch_in": "2025-10-02T09:10:00+00:00",
+    "punch_out": "2025-10-02T19:00:00+00:00",
+    "work_hours": 9.83,
+    "status": "completed",
+    "is_corrected": true,
+    "punch_in_date": "2025-10-02"
+  },
+  {
+    "employee_id": "PLACEHOLDER_REPLACE_AFTER_SEED",
+    "punch_in": "2025-10-02T08:50:00+00:00",
+    "punch_out": "2025-10-02T17:15:00+00:00",
+    "work_hours": 8.42,
+    "status": "completed",
+    "is_corrected": false,
+    "punch_in_date": "2025-10-02"
+  },
+  {
+    "employee_id": "PLACEHOLDER_REPLACE_AFTER_SEED",
+    "punch_in": "2025-10-03T09:05:00+00:00",
+    "punch_out": "2025-10-03T17:45:00+00:00",
+    "work_hours": 8.67,
+    "status": "completed",
+    "is_corrected": false,
+    "punch_in_date": "2025-10-03"
+  },
+  {
+    "employee_id": "PLACEHOLDER_REPLACE_AFTER_SEED",
+    "punch_in": "2025-10-03T09:00:00+00:00",
+    "punch_out": "2025-10-03T18:30:00+00:00",
+    "work_hours": 9.5,
+    "status": "completed",
+    "is_corrected": false,
+    "punch_in_date": "2025-10-03"
+  },
+  {
+    "employee_id": "PLACEHOLDER_REPLACE_AFTER_SEED",
+    "punch_in": "2025-10-03T09:20:00+00:00",
+    "punch_out": "2025-10-03T16:00:00+00:00",
+    "work_hours": 6.67,
+    "status": "completed",
+    "is_corrected": true,
+    "punch_in_date": "2025-10-03"
+  }
+]

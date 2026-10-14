@@ -1,0 +1,82 @@
+[
+  {
+    "name": "Alice Johnson",
+    "email": "alice.johnson@company.com",
+    "department": "Engineering",
+    "designation": "Senior Software Engineer",
+    "salary": 95000,
+    "join_date": "2022-03-15"
+  },
+  {
+    "name": "Bob Smith",
+    "email": "bob.smith@company.com",
+    "department": "Engineering",
+    "designation": "Software Engineer",
+    "salary": 75000,
+    "join_date": "2023-01-10"
+  },
+  {
+    "name": "Carol Williams",
+    "email": "carol.williams@company.com",
+    "department": "HR",
+    "designation": "HR Manager",
+    "salary": 85000,
+    "join_date": "2021-06-01"
+  },
+  {
+    "name": "David Brown",
+    "email": "david.brown@company.com",
+    "department": "Sales",
+    "designation": "Sales Representative",
+    "salary": 65000,
+    "join_date": "2023-07-20"
+  },
+  {
+    "name": "Eva Davis",
+    "email": "eva.davis@company.com",
+    "department": "Marketing",
+    "designation": "Marketing Specialist",
+    "salary": 70000,
+    "join_date": "2022-11-05"
+  },
+  {
+    "name": "Frank Miller",
+    "email": "frank.miller@company.com",
+    "department": "Finance",
+    "designation": "Financial Analyst",
+    "salary": 80000,
+    "join_date": "2021-09-12"
+  },
+  {
+    "name": "Grace Wilson",
+    "email": "grace.wilson@company.com",
+    "department": "Operations",
+    "designation": "Operations Lead",
+    "salary": 72000,
+    "join_date": "2022-08-18"
+  },
+  {
+    "name": "Henry Taylor",
+    "email": "henry.taylor@company.com",
+    "department": "Engineering",
+    "designation": "DevOps Engineer",
+    "salary": 88000,
+    "join_date": "2023-02-28"
+  },
+  {
+    "name": "Iris Anderson",
+    "email": "iris.anderson@company.com",
+    "department": "HR",
+    "designation": "HR Coordinator",
+    "salary": 60000,
+    "join_date": "2023-09-01"
+  },
+  {
+    "name": "Jack Thomas",
+    "email": "jack.thomas@company.com",
+    "department": "Sales",
+    "designation": "Sales Manager",
+    "salary": 90000,
+    "join_date": "2021-04-15"
+  }
+]
